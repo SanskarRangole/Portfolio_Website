@@ -876,11 +876,11 @@
             animation: fadeInUp 1.2s ease 0.2s both;
         }
 
-        /* Avatar in Hero */
+        /* Avatar in Hero (responsive) */
         .hero-avatar-wrap {
-            /* fixed circular container with border and overflow hidden so the image always fits */
-            width: 128px;
-            height: 128px;
+            /* responsive circular container with a stable aspect ratio to avoid layout shift */
+            width: clamp(64px, 16vw, 128px);
+            aspect-ratio: 1/1;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -891,23 +891,21 @@
             border: 1px solid rgba(255,255,255,0.95);
             box-shadow: 0 10px 30px rgba(16,24,40,0.12);
             background: linear-gradient(135deg, #ffffff, #f3f4f6);
+            flex: 0 0 auto;
         }
 
         .hero-avatar {
-            /* show the full image inside the circular frame without cropping */
             width: 100%;
             height: 100%;
-            object-fit: cover; /* ensures entire photo is visible */
+            object-fit: cover;
             object-position: center center;
             display: block;
             border: 0;
-            border-radius: 0; /* radius handled by wrapper */
             background: transparent;
-            /* inner padding so the face doesn't touch the white ring */
             padding: 4px;
             box-sizing: border-box;
-            /* subtle transition when we adjust padding/scale */
             transition: transform 0.22s ease, padding 0.18s ease;
+            will-change: transform;
         }
 
         .avatar-fallback {
@@ -925,7 +923,7 @@
 
         /* Responsive avatar sizing */
         @media (max-width: 768px) {
-            .hero-avatar-wrap { width: 104px; height: 104px; border-width: 3px; }
+            .hero-avatar-wrap { width: clamp(64px, 18vw, 104px); border-width: 3px; }
             .hero-avatar { padding: 6px; }
             .avatar-fallback { font-size: 28px; }
         }
@@ -943,8 +941,10 @@
             .hero h1 { font-size: 40px; }
             .typing-container { font-size: 18px; margin-bottom: 8px; }
             .cta-buttons { margin-top: 18px; }
-            .hero-avatar-wrap { width: 84px; height: 84px; border-width: 2px; }
+            .hero-avatar-wrap { width: clamp(56px, 20vw, 84px); border-width: 2px; }
             .hero-avatar { padding: 4px; }
+            /* simplify hero social on small screens so it does not overlap content */
+            .hero-social { display: none; }
         }
 
         .hero h1 {
@@ -1713,20 +1713,23 @@
         /* Projects Section */
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 35px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            align-items: stretch;
         }
 
         .project-card {
             background: #ffffff;
-            border-radius: 25px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            transition: all 0.5s ease;
-            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+            cursor: default;
             position: relative;
-            border: 2px solid #e2e8f0;
-            min-height: 400px;
+            border: 1px solid #e6eefc;
+            display: flex;
+            flex-direction: column;
+            min-height: 320px;
         }
 
         .project-card::before {
@@ -1772,12 +1775,19 @@
         }
 
         .project-header {
-            padding: 40px 35px;
+            padding: 28px 24px;
             background: linear-gradient(135deg, #FF3B86, #FF1744);
             color: white;
             position: relative;
             z-index: 2;
-            transition: all 0.5s ease;
+            transition: transform 0.35s ease;
+        }
+
+        .project-header h3 {
+            font-size: 22px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -0.2px;
         }
 
         .project-card:nth-child(2) .project-header {
@@ -1820,23 +1830,19 @@
             50% { transform: translateY(-8px); }
         }
 
-        .project-card h3 {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-        }
-
         .project-body {
-            padding: 30px 35px;
+            padding: 22px 24px 90px 24px; /* extra bottom padding to make room for absolute actions */
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1 1 auto;
             position: relative;
-            z-index: 2;
         }
 
         .project-body p {
             color: #475569;
-            line-height: 1.8;
-            margin-bottom: 20px;
+            line-height: 1.7;
+            margin-bottom: 12px;
             font-size: 15px;
         }
 
@@ -1844,6 +1850,38 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .projects-grid { gap: 18px; grid-template-columns: 1fr; }
+            .project-card { min-height: auto; }
+            .project-header { padding: 20px 18px; }
+            .project-body { padding: 16px 18px 20px 18px; }
+            .project-actions { position: static; left: auto; bottom: auto; margin-top: 12px; }
+        }
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 3;
+            /* position at the bottom-left of the project card */
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            margin: 0;
+        }
+
+        .project-actions .btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
         }
 
         .tag {
@@ -1878,59 +1916,109 @@
         /* Achievements Section */
         .achievements-grid {
             display: grid;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-auto-rows: 1fr; /* ensures each grid cell matches height */
+            gap: 24px;
             max-width: 1100px;
             margin: 0 auto;
+            align-items: stretch;
         }
 
         .achievement-card {
-            background: linear-gradient(135deg, #eff6ff, #faf5ff);
-            padding: 40px;
-            border-radius: 25px;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            padding: 20px;
+            border-radius: 18px;
             display: flex;
-            align-items: flex-start;
-            gap: 30px;
-            transition: all 0.4s ease;
-            border: 2px solid #e2e8f0;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            flex-direction: column; /* stack media above content for consistent height */
+            gap: 14px;
+            transition: transform 0.35s cubic-bezier(.22,.9,.32,1), box-shadow 0.35s ease;
+            border: 1px solid #eef2ff;
+            box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+            position: relative;
+            overflow: hidden;
+            height: 100%; /* grow to match grid row */
         }
 
         .achievement-card:hover {
-            transform: translateX(15px);
-            box-shadow: 0 20px 60px rgba(255, 59, 134, 0.25);
-            border-color: #FF3B86;
-            background: linear-gradient(135deg, #fff0f5, #fff8e7);
+            transform: translateY(-12px) scale(1.01);
+            box-shadow: 0 32px 80px rgba(37,99,235,0.12), 0 8px 30px rgba(16,24,40,0.08);
+            border-color: rgba(37,99,235,0.08);
+        }
+
+        /* animated sheen that sweeps across the card on hover */
+        .achievement-card::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            left: -60%;
+            width: 220%;
+            height: 200%;
+            background: linear-gradient(120deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.02) 100%);
+            transform: translateX(-100%) rotate(15deg);
+            transition: transform 0.9s cubic-bezier(.2,.8,.2,1), opacity 0.35s ease;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .achievement-card:hover::after { transform: translateX(20%) rotate(15deg); opacity: 1; }
+
+        .achievement-media {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 12px;
+            overflow: hidden;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f3f4f6, #ffffff);
+            box-shadow: 0 6px 20px rgba(16,24,40,0.04);
+        }
+
+        .achievement-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
         }
 
         .achievement-icon {
-            font-size: 64px;
-            min-width: 80px;
-            animation: achievement-subtle-bounce 3s ease-in-out infinite;
-            filter: none;
+            font-size: 36px;
+            color: #ffb86b;
+            min-width: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @keyframes achievement-subtle-bounce {
-            0%, 100% { 
-                transform: translateY(0);
-            }
-            50% { 
-                transform: translateY(-12px);
-            }
-        }
+        .achievement-content { display:flex; flex-direction:column; flex:1; }
 
         .achievement-content h3 {
-            color: #FF3B86;
-            margin-bottom: 12px;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
         }
 
         .achievement-content p {
             color: #475569;
-            line-height: 1.8;
-            font-size: 15px;
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 8px;
+            flex:1; /* allows content to take available space so cards align */
         }
+
+        .achievement-meta {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* Note: interactive add form removed for personal portfolio security.
+           Use the static achievement cards below and add images manually into the
+           `assets/` folder, then update the HTML to reference those images.
+        */
 
         /* Resume Section */
         .resume-section {
@@ -1943,6 +2031,123 @@
             border: 3px solid #FF3B86;
             position: relative;
             box-shadow: 0 8px 25px rgba(255, 59, 134, 0.1);
+        }
+
+        /* Featured Certificates Section */
+        .certificates-section { padding: 60px 60px; max-width:1200px; margin: 40px auto; }
+        .certificates-title { font-size: 42px; font-weight: 900; margin-bottom: 20px; text-align: center; }
+
+        .cert-slider {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+        }
+
+        .featured-badge{ position:absolute; top:12px; left:12px; background:linear-gradient(90deg,#FF3B86,#FF8FA3); color:white; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; box-shadow:0 6px 18px rgba(255,59,134,0.18); z-index:6 }
+
+        .cert-card {
+            scroll-snap-align: start;
+            flex: 0 0 320px;
+            background: linear-gradient(180deg, #ffffff, #fbfbff);
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+            overflow: hidden;
+            transition: transform .32s cubic-bezier(.2,.9,.3,1), box-shadow .32s ease;
+            border: 1px solid #eef2ff;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(18px) scale(.995);
+            animation: cardEnter 620ms cubic-bezier(.2,.9,.3,1) both;
+        }
+
+        /* Stagger a subtle entrance for the first few visible cards */
+        .cert-slider .cert-card:nth-child(1){ animation-delay: 60ms; }
+        .cert-slider .cert-card:nth-child(2){ animation-delay: 140ms; }
+        .cert-slider .cert-card:nth-child(3){ animation-delay: 220ms; }
+
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(18px) scale(.995); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .cert-thumb { width:100%; height:200px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative }
+        .cert-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition: transform 420ms cubic-bezier(.2,.9,.3,1); }
+
+        /* sheen overlay */
+        .cert-thumb::after{
+            content: '';
+            position: absolute;
+            left: -80%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg) translateX(0);
+            transition: transform 650ms cubic-bezier(.2,.9,.3,1), opacity 650ms;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cert-card:hover .cert-thumb::after{ transform: translateX(180%) skewX(-20deg); opacity:1 }
+        .cert-card:hover .cert-thumb img{ transform: scale(1.06) rotate(-0.6deg) }
+
+        /* slight 3D tilt on hover (desktop only) */
+        @media (hover: hover) and (pointer: fine){
+            .cert-card{ will-change: transform }
+            .cert-card:hover{ transform: perspective(800px) translateY(-12px) rotateX(2deg) }
+        }
+
+        .cert-body { padding: 14px 16px; display:flex; flex-direction:column; gap:8px; flex:1 }
+        .cert-body h3 { font-size:16px; margin:0; font-weight:800; color:#0f172a }
+        .cert-body .issuer { font-size:13px; color:#6b7280 }
+        .cert-body .cert-meta { font-size:13px; color:#94a3b8 }
+
+        .cert-actions { display:flex; gap:8px; margin-top:auto }
+        .cert-actions .btn { padding:8px 12px; font-size:13px }
+
+        .cert-card:hover{ box-shadow: 0 40px 100px rgba(37,99,235,0.12) }
+
+        /* Modal / Lightbox for certificates */
+        .cert-modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.6); display:none; align-items:center; justify-content:center; z-index:2000 }
+        .cert-modal{ width:min(900px,92%); max-height:90vh; background:#fff; border-radius:12px; overflow:auto; box-shadow:0 30px 80px rgba(2,6,23,0.6); display:flex; flex-direction:column }
+        .cert-modal .modal-header{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #eef2ff }
+        .cert-modal .modal-body{ padding:14px; display:flex; gap:14px; align-items:flex-start }
+        .cert-modal .modal-body img{ width:46%; height:auto; max-height:70vh; object-fit:contain; border-radius:8px }
+        .cert-modal .modal-meta{ flex:1 }
+        .cert-modal .close-btn{ background:transparent; border:0; font-size:18px; cursor:pointer; color:#0f172a }
+
+        @media (max-width:768px) {
+            .certificates-section { padding: 40px 20px; margin: 30px auto; }
+            .certificates-title { font-size: 32px; margin-bottom: 24px; }
+            .cert-slider { gap: 16px; }
+            .cert-card{ flex:0 0 calc(100% - 16px); }
+            .cert-thumb{ height: 220px; }
+            .cert-body h3 { font-size: 15px; }
+            .cert-body .issuer { font-size: 12px; }
+            .cert-body .cert-meta { font-size: 12px; }
+            .cert-actions .btn { padding: 10px 14px; font-size: 12px; }
+        }
+
+        @media (max-width:480px) {
+            .certificates-section { padding: 30px 16px; margin: 20px auto; }
+            .certificates-title { font-size: 24px; margin-bottom: 20px; }
+            .cert-slider { gap: 12px; padding-bottom: 12px; }
+            .cert-card { flex: 0 0 calc(100% - 12px); border-radius: 12px; }
+            .cert-thumb { height: 180px; }
+            .cert-body { padding: 12px 14px; gap: 6px; }
+            .cert-body h3 { font-size: 14px; line-height: 1.4; }
+            .cert-body .issuer { font-size: 11px; }
+            .cert-body .cert-meta { font-size: 11px; }
+            .cert-actions { gap: 6px; flex-wrap: wrap; }
+            .cert-actions .btn { padding: 8px 10px; font-size: 11px; flex: 1; }
+            .cert-modal { width: 96%; }
+            .cert-modal .modal-body { padding: 12px; flex-direction: column; }
+            .cert-modal .modal-body img { width: 100%; }
+            .cert-modal .modal-header { padding: 10px 12px; }
         }
 
         .resume-section h2 {
@@ -2113,6 +2318,12 @@
             .about-grid {
                 grid-template-columns: 1fr;
             }
+            .achievement-card
+            {
+                display: block;
+                text-align: center;
+                
+            }
 
             .timeline::before {
                 left: 30px;
@@ -2209,15 +2420,16 @@
   <nav id="navbar">
    <div class="logo">
     SR1   </div>
-   <ul class="nav-links">
-    <li><a href="#home">Home</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#education">Education</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#achievements">Achievements</a></li>
-    <li><a href="#contact">Contact</a></li>
-   </ul>
+    <ul class="nav-links">
+     <li><a href="#home">Home</a></li>
+     <li><a href="#about">About</a></li>
+     <li><a href="#education">Education</a></li>
+     <li><a href="#skills">Skills</a></li>
+     <li><a href="#projects">Projects</a></li>
+     <li><a href="#achievements">Achievements</a></li>
+     <li><a href="#certificates">Certificates</a></li>
+     <li><a href="#contact">Contact</a></li>
+    </ul>
    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
     <span class="bar"></span>
    </button>
@@ -2225,15 +2437,16 @@
   <div class="mobile-menu-backdrop" id="mobileBackdrop" aria-hidden="true"></div>
   <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
    <button class="close-btn" id="mobileClose" aria-label="Close navigation menu">&times;</button>
-   <div class="mobile-links">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#education">Education</a>
-    <a href="#skills">Skills</a>
-    <a href="#projects">Projects</a>
-    <a href="#achievements">Achievements</a>
-    <a href="#contact">Contact</a>
-   </div>
+    <div class="mobile-links">
+     <a href="#home">Home</a>
+     <a href="#about">About</a>
+     <a href="#education">Education</a>
+     <a href="#skills">Skills</a>
+     <a href="#projects">Projects</a>
+     <a href="#achievements">Achievements</a>
+     <a href="#certificates">Certificates</a>
+     <a href="#contact">Contact</a>
+    </div>
   </div>
   <div class="bg-animation">
    <!-- Gradient Orbs for Soft Background -->
@@ -2264,12 +2477,16 @@
 
    <div class="hero-content">
     <!-- Avatar (place your image at assets/avatar.jpg). Fallback shows initials if image fails to load -->
-    <div class="hero-avatar-wrap">
-    <img src="assets/logo1.png" alt="Sanskar Rangole" class="hero-avatar" loading="lazy"
-        onerror="if(this.src.indexOf('.svg')===-1){this.src='assets/logo.svg';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}"
-        onload="this.nextElementSibling.style.display='none'">
-     <div class="avatar-fallback" aria-hidden="false">SR</div>
-    </div>
+        <div class="hero-avatar-wrap">
+            <picture>
+                <!-- Use existing files in assets: logo1.png and logo.jpg -->
+                <source type="image/png" srcset="assets/logo1.png 320w, assets/logo.jpg 640w" sizes="(max-width:480px) 84px, (max-width:768px) 104px, 128px">
+                <img src="assets/logo1.png" alt="Sanskar Rangole" class="hero-avatar" loading="lazy" decoding="async" width="128" height="128"
+                    onerror="(function(img){ if(img.getAttribute('data-fallback-tried')){ img.style.display='none'; img.nextElementSibling.style.display='flex'; return; } img.setAttribute('data-fallback-tried','true'); img.src='assets/logo.jpg'; })(this);"
+                    onload="this.nextElementSibling.style.display='none'">
+            </picture>
+         <div class="avatar-fallback" aria-hidden="false">SR</div>
+        </div>
 
     <h1 id="hero-greeting"><span class="gradient-text"><i class="fas fa-wave-hand"></i> Hi, I'm Sanskar Rangole</span></h1>
     <div class="typing-container"><span class="typing-text" id="typing-text"></span></div>
@@ -2515,6 +2732,9 @@
       <p>Python-based Marathi Voice Assistant using advanced speech recognition and automation. Features natural language processing with a unique regional touch.</p>
       <div class="project-tags"><span class="tag">Python</span> <span class="tag">Voice AI</span> <span class="tag">NLP</span> <span class="tag">Automation</span>
       </div>
+    <div class="project-actions">
+     <a class="btn btn-secondary" href="https://drive.google.com/drive/folders/PLACEHOLDER_BLAZE_DRIVE" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download (Drive)</a>
+    </div>
      </div>
     </div>
     <div class="project-card">
@@ -2525,6 +2745,9 @@
       <p>Automated Python tool for tracking student activity and usage in college lab systems. Streamlines attendance and resource management.</p>
       <div class="project-tags"><span class="tag">Python</span> <span class="tag">Automation</span> <span class="tag">Database</span> <span class="tag">Tracking</span>
       </div>
+    <div class="project-actions">
+     <a class="btn btn-secondary" href="https://github.com/SanskarRangole/College-Lab-PC-Usage-Logger" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+    </div>
      </div>
     </div>
     <div class="project-card">
@@ -2536,6 +2759,9 @@
       <p>Android application for local shop management and billing system. Simplifies inventory tracking and customer transactions.</p>
             <div class="project-tags"><span class="tag">Android</span> <span class="tag">Java</span> <span class="tag">SQLite</span> <span class="tag">UI/UX</span>
       </div>
+        <div class="project-actions">
+         <a class="btn btn-secondary" href="https://drive.google.com/drive/folders/PLACEHOLDER_DUKAN_DRIVE" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download (Drive)</a>
+        </div>
      </div>
     </div>
     <div class="project-card">
@@ -2546,6 +2772,9 @@
       <p>Event and team coordination tool for community events. Manages registrations, schedules, and team communications efficiently.</p>
       <div class="project-tags"><span class="tag">Android</span> <span class="tag">Java</span> <span class="tag">UI/UX</span> <span class="tag">Management</span>
       </div>
+    <div class="project-actions">
+     <a class="btn btn-secondary" href="https://drive.google.com/drive/folders/PLACEHOLDER_MANDAL_DRIVE" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download (Drive)</a>
+    </div>
      </div>
     </div>
     <div class="project-card">
@@ -2557,6 +2786,9 @@
              <p>Photography website featuring galleries, client booking, and responsive portfolio layout showcasing professional photography work.</p>
             <div class="project-tags"><span class="tag">Web</span> <span class="tag">HTML</span> <span class="tag">CSS</span> <span class="tag">JavaScript</span> <span class="tag">Live</span>
       </div>
+        <div class="project-actions">
+         <a class="btn btn-primary" href="https://mahesh-photography.example.com" target="_blank" rel="noopener noreferrer"><i class="fas fa-eye"></i> View Project</a>
+        </div>
      </div>
     </div>
     <div class="project-card">
@@ -2567,55 +2799,103 @@
       <p>Unity 3D action game with level-based gameplay. Features physics-based mechanics, obstacle navigation, and progressive difficulty.</p>
       <div class="project-tags"><span class="tag">Unity</span> <span class="tag">C#</span> <span class="tag">3D</span> <span class="tag">Game Dev</span>
       </div>
+    <div class="project-actions">
+     <a class="btn btn-secondary" href="https://github.com/SanskarRangole/drone-escape-game" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+    </div>
      </div>
     </div>
    </div>
   </section>
-  <section id="achievements">
-   <h2 class="section-title" id="achievements-title">Achievements &amp; Experience</h2>
-   <div class="achievements-grid">
-    <div class="achievement-card">
-     <div class="achievement-icon">
-      <i class="fas fa-medal"></i>
+    <section id="achievements">
+     <h2 class="section-title" id="achievements-title">Achievements &amp; Experience</h2>
+
+     <!-- Achievements are static in this personal portfolio. To add an image:
+                1) Place your image in the `assets/` folder (e.g. `assets/award1.jpg`).
+                2) Replace the icon block below with:
+                     <div class="achievement-media"><img src="assets/award1.jpg" alt="Award"></div>
+                This keeps the site secure and prevents public uploads.
+     -->
+
+    <div class="achievements-grid" id="achievements-grid">
+     <div class="achievement-card">
+      <div class="achievement-media"><img src="images/cerit2_cover.jpg" alt="Quantum Computing Award"></div>
+      <div class="achievement-content">
+        <h3>1st Place - Quantum Computing Paper Presentation</h3>
+        <p>Secured first position in a competitive paper presentation on Quantum Computing during Teachers' Day Event, demonstrating deep understanding of cutting-edge technology and excellent presentation skills.</p>
+      </div>
      </div>
-     <div class="achievement-content">
-      <h3>1st Place - Quantum Computing Paper Presentation</h3>
-      <p>Secured first position in a competitive paper presentation on Quantum Computing during Teachers' Day Event, demonstrating deep understanding of cutting-edge technology and excellent presentation skills.</p>
+     <div class="achievement-card">
+      <div class="achievement-media"><img src="images/certi1_cover.jpg" alt="Blind Faith Award"></div>
+      <div class="achievement-content">
+        <h3>1st Place in Blind Faith - National Level Technical Event</h3>
+        <p>Secured first position in the Blind Faith national level technical event, showcasing exceptional technical skills and innovative problem-solving abilities.</p>
+      </div>
      </div>
-    </div>
-    <div class="achievement-card">
-     <div class="achievement-icon">
-      <i class="fas fa-medal"></i>
+     <div class="achievement-card">
+      <div class="achievement-media"><img src="images/certi3_cover.png" alt="Academic Topper Award"></div>
+      <div class="achievement-content">
+        <h3>FY &amp; SY Academic Topper in Diploma</h3>
+        <p>Achieved top academic performance in First Year and Second Year of Diploma in Computer Science &amp; IT at Sharad Institute of Technology, Polytechnic, Yadrav.</p>
+      </div>
      </div>
-     <div class="achievement-content">
-      <h3>1st Place in Blind Faith - National Level Technical Event</h3>
-      <p>Secured first position in the Blind Faith national level technical event, showcasing exceptional technical skills and innovative problem-solving abilities.</p>
-     </div>
-    </div>
-<div class="achievement-card">
-<div class="achievement-icon">
-<i class="fas fa-trophy"></i>
-</div>
-<div class="achievement-content">
-<h3>FY & SY Academic Topper in Diploma</h3>
-<p>Achieved top academic performance in First Year and Second Year of Diploma in Computer Science & IT at Sharad Institute of Technology, Polytechnic, Yadrav, demonstrating excellence in technical education and consistent academic achievement.</p>
-</div>
-</div>
-<div class="achievement-card">
-<div class="achievement-icon">
-<i class="fas fa-briefcase"></i>
-</div>
-<div class="achievement-content">
-<h3>Intern at Domain Computer</h3>
-      <p>Gained hands-on experience in Python programming and AI/ML development during a 2-month internship (Jun 2024 - Jul 2024) in Kolhapur. Worked on multiple projects including developing an advanced voice assistant named Blaze with cutting-edge AI capabilities.</p>
-      <div style="margin-top: 10px; font-size: 14px; color: #666;">
-       <strong>Duration:</strong> Jun 2024 - Jul 2024 (2 months) | <strong>Location:</strong> Kolhapur, Maharashtra (On-site)<br>
-       <strong>Skills:</strong> Python, AI/ML, Voice Assistant Development
+     <div class="achievement-card">
+      <div class="achievement-media"><img src="images/cover4.png" alt="Academic Topper Award"></div>
+      <div class="achievement-content"></div>
+      <div class="achievement-content">
+        <h3>Intern at Domain Computer</h3>
+        <p>Gained hands-on experience in Python programming and AI/ML development during a 2-month internship (Jun 2024 - Jul 2024).</p>
+        <div class="achievement-meta"><strong>Skills:</strong> Python, AI/ML, Voice Assistant Development</div>
       </div>
      </div>
     </div>
-   </div>
-  </section>
+    </section>
+
+    <!-- Featured Certificates (moved so it appears after Achievements and before Resume) -->
+    <section id="certificates" class="certificates-section">
+        <h2 class="certificates-title">Featured Certificates</h2>
+        <div class="cert-slider" id="cert-slider">
+            <!-- Example card: replace image path with your real certificate image in assets/ -->
+            <article class="cert-card">
+                <div class="cert-thumb"><img src="images/cert1.png" alt="Certificate 1"></div>
+                <div class="cert-body">
+                    <h3>1st Rank - Quantum Computing Paper Presentation</h3>
+                    <div class="issuer">National Level Ornate Event</div>
+                    <div class="cert-meta">Outstanding technical presentation and innovation</div>
+                    <div class="cert-actions">
+                        <a class="btn btn-primary" href="images/cert1.png" target="_blank" rel="noopener noreferrer"><i class="fas fa-eye"></i> View</a>
+                        <a class="btn btn-secondary" href="images/cert1.png" download><i class="fas fa-download"></i> Download</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="cert-card">
+                <div class="cert-thumb"><img src="images/certi2.jpg" alt="Certificate 2"></div>
+                <div class="cert-body">
+                    <h3>1st Rank - Blind Faith Technical Event</h3>
+                    <div class="issuer">National Level Ornate Technical Event</div>
+                    <div class="cert-meta">Exceptional problem-solving and technical skills</div>
+                    <div class="cert-actions">
+                        <a class="btn btn-primary" href="images/certi2.jpg" target="_blank" rel="noopener noreferrer"><i class="fas fa-eye"></i> View</a>
+                        <a class="btn btn-secondary" href="images/certi2.jpg" download><i class="fas fa-download"></i> Download</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="cert-card">
+                <div class="cert-thumb"><img src="images/certi3.jpg" alt="Certificate 3"></div>
+                <div class="cert-body">
+                    <h3>NPTEL Course Certificate</h3>
+                    <div class="issuer">National Programme on Technology Enhanced Learning</div>
+                    <div class="cert-meta">Successfully completed and earned certificate</div>
+                    <div class="cert-actions">
+                        <a class="btn btn-primary" href="images/certi3.jpg" target="_blank" rel="noopener noreferrer"><i class="fas fa-eye"></i> View</a>
+                        <a class="btn btn-secondary" href="images/certi3.jpg" download><i class="fas fa-download"></i> Download</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
     <div class="resume-section">
      <h2><i class="fas fa-file-pdf"></i> My Resume</h2>
      <p>Download my complete resume to learn more about your skills, projects, and experience.</p>
@@ -2652,295 +2932,78 @@
         </div>
    </div>
   </section>
-  <footer>
+  
+    
+    <footer>
    <p id="footer-text">© 2025 Sanskar Rangole | Designed with <i class="fas fa-heart"></i> Passion &amp; Code</p>
   </footer>
-  <script>
-        const defaultConfig = {
-            hero_greeting: "<i class='fas fa-wave-hand'></i> Hi, I'm Sanskar Rangole",
-            hero_tagline: "Transforming ideas into intelligent solutions | Python, AI/ML & Full Stack Development",
-            about_title: "About Me",
-            education_title: "Education Journey",
-            skills_title: "Technical Skills",
-            projects_title: "Featured Projects",
-            achievements_title: "Achievements & Experience",
-            contact_title: "Let's Connect",
-            footer_text: "© 2025 Sanskar Rangole | Designed with <i class='fas fa-heart'></i> Passion & Code",
-            background_color: "#ffffff",
-            primary_color: "#2563eb",
-            secondary_color: "#7c3aed",
-            accent_color: "#10b981",
-            text_color: "#1a1a1a",
-            font_family: "Poppins",
-            font_size: 16
-        };
+                                <!-- Certificate modal (lightbox) -->
+                                <div class="cert-modal-backdrop" id="cert-modal-backdrop" aria-hidden="true">
+                    <div class="cert-modal" role="dialog" aria-modal="true" aria-labelledby="cert-modal-title">
+                        <div class="modal-header">
+                            <strong id="cert-modal-title">Certificate</strong>
+                            <button class="close-btn" id="cert-modal-close" aria-label="Close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="cert-modal-img" src="" alt="Certificate preview">
+                            <div class="modal-meta">
+                                <h3 id="cert-modal-name"></h3>
+                                <div class="issuer" id="cert-modal-issuer"></div>
+                                <div class="cert-meta" id="cert-modal-meta"></div>
+                                <div style="margin-top:12px;"><a id="cert-modal-download" class="btn btn-primary" href="#" download><i class="fas fa-download"></i> Download</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        async function onConfigChange(config) {
-            const heroGreeting = config.hero_greeting || defaultConfig.hero_greeting;
-            const heroTagline = config.hero_tagline || defaultConfig.hero_tagline;
-            const aboutTitle = config.about_title || defaultConfig.about_title;
-            const educationTitle = config.education_title || defaultConfig.education_title;
-            const skillsTitle = config.skills_title || defaultConfig.skills_title;
-            const projectsTitle = config.projects_title || defaultConfig.projects_title;
-            const achievementsTitle = config.achievements_title || defaultConfig.achievements_title;
-            const contactTitle = config.contact_title || defaultConfig.contact_title;
-            const footerText = config.footer_text || defaultConfig.footer_text;
-            
-            const backgroundColor = config.background_color || defaultConfig.background_color;
-            const primaryColor = config.primary_color || defaultConfig.primary_color;
-            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
-            const accentColor = config.accent_color || defaultConfig.accent_color;
-            const textColor = config.text_color || defaultConfig.text_color;
-            const customFont = config.font_family || defaultConfig.font_family;
-            const baseSize = config.font_size || defaultConfig.font_size;
+                <script>
+                // Lightbox for certificates (static files only)
+                (function(){
+                        const backdrop = document.getElementById('cert-modal-backdrop');
+                        const img = document.getElementById('cert-modal-img');
+                        const title = document.getElementById('cert-modal-name');
+                        const issuer = document.getElementById('cert-modal-issuer');
+                        const meta = document.getElementById('cert-modal-meta');
+                        const download = document.getElementById('cert-modal-download');
+                        const closeBtn = document.getElementById('cert-modal-close');
 
-            document.getElementById('hero-greeting').innerHTML = `<span class="gradient-text">${heroGreeting}</span>`;
-            document.getElementById('about-title').textContent = aboutTitle;
-            document.getElementById('education-title').textContent = educationTitle;
-            document.getElementById('skills-title').textContent = skillsTitle;
-            document.getElementById('projects-title').textContent = projectsTitle;
-            document.getElementById('achievements-title').textContent = achievementsTitle;
-            document.getElementById('contact-title').textContent = contactTitle;
-            document.getElementById('footer-text').textContent = footerText;
-
-            document.body.style.backgroundColor = backgroundColor;
-            document.body.style.color = textColor;
-
-            const gradientElements = document.querySelectorAll('.gradient-text');
-            gradientElements.forEach(el => {
-                el.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor}, ${accentColor})`;
-                el.style.webkitBackgroundClip = 'text';
-                el.style.webkitTextFillColor = 'transparent';
-                el.style.backgroundClip = 'text';
-            });
-
-            const shapes = document.querySelectorAll('.gradient-shape');
-            shapes[0].style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-            shapes[1].style.background = `linear-gradient(135deg, ${accentColor}, ${primaryColor})`;
-            shapes[2].style.background = `linear-gradient(135deg, ${secondaryColor}, ${accentColor})`;
-
-            const primaryButtons = document.querySelectorAll('.btn-primary');
-            primaryButtons.forEach(btn => {
-                btn.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-            });
-
-            const secondaryButtons = document.querySelectorAll('.btn-secondary');
-            secondaryButtons.forEach(btn => {
-                btn.style.color = primaryColor;
-                btn.style.borderColor = primaryColor;
-            });
-
-            const contactIcons = document.querySelectorAll('.contact-icon');
-            contactIcons.forEach(icon => {
-                icon.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-            });
-
-            const projectHeaders = document.querySelectorAll('.project-header');
-            projectHeaders.forEach(header => {
-                header.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-            });
-
-            const timelineIcons = document.querySelectorAll('.timeline-icon');
-            timelineIcons.forEach(icon => {
-                icon.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-            });
-
-            const baseFontStack = 'sans-serif';
-            document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
-            
-            document.querySelector('.hero h1').style.fontSize = `${baseSize * 4}px`;
-            document.querySelector('.typing-container').style.fontSize = `${baseSize * 1.625}px`;
-            
-            const sectionTitles = document.querySelectorAll('.section-title');
-            sectionTitles.forEach(title => {
-                title.style.fontSize = `${baseSize * 3}px`;
-            });
-            
-            const aboutText = document.querySelector('.about-text');
-            if (aboutText) {
-                aboutText.style.fontSize = `${baseSize * 1.125}px`;
-            }
-
-            typeWriter(heroTagline);
-        }
-
-        function typeWriter(text) {
-            const element = document.getElementById('typing-text');
-            element.textContent = '';
-            let i = 0;
-            
-            function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(type, 80);
-                }
-            }
-            
-            setTimeout(type, 500);
-        }
-
-        window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('section').forEach(section => {
-            observer.observe(section);
-        });
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-
-        if (window.elementSdk) {
-            window.elementSdk.init({
-                defaultConfig,
-                onConfigChange,
-                mapToCapabilities: (config) => ({
-                    recolorables: [
-                        {
-                            get: () => config.background_color || defaultConfig.background_color,
-                            set: (value) => {
-                                config.background_color = value;
-                                window.elementSdk.setConfig({ background_color: value });
-                            }
-                        },
-                        {
-                            get: () => config.primary_color || defaultConfig.primary_color,
-                            set: (value) => {
-                                config.primary_color = value;
-                                window.elementSdk.setConfig({ primary_color: value });
-                            }
-                        },
-                        {
-                            get: () => config.secondary_color || defaultConfig.secondary_color,
-                            set: (value) => {
-                                config.secondary_color = value;
-                                window.elementSdk.setConfig({ secondary_color: value });
-                            }
-                        },
-                        {
-                            get: () => config.accent_color || defaultConfig.accent_color,
-                            set: (value) => {
-                                config.accent_color = value;
-                                window.elementSdk.setConfig({ accent_color: value });
-                            }
-                        },
-                        {
-                            get: () => config.text_color || defaultConfig.text_color,
-                            set: (value) => {
-                                config.text_color = value;
-                                window.elementSdk.setConfig({ text_color: value });
-                            }
+                        function openModal({src,name,issuerText,metaText}){
+                                img.src = src || '';
+                                img.alt = name || 'Certificate preview';
+                                title.textContent = name || '';
+                                issuer.textContent = issuerText || '';
+                                meta.textContent = metaText || '';
+                                download.href = src || '#';
+                                backdrop.style.display = 'flex';
+                                backdrop.setAttribute('aria-hidden','false');
+                                document.body.style.overflow = 'hidden';
                         }
-                    ],
-                    borderables: [],
-                    fontEditable: {
-                        get: () => config.font_family || defaultConfig.font_family,
-                        set: (value) => {
-                            config.font_family = value;
-                            window.elementSdk.setConfig({ font_family: value });
+                        function closeModal(){
+                                backdrop.style.display = 'none';
+                                backdrop.setAttribute('aria-hidden','true');
+                                img.src = '';
+                                document.body.style.overflow = '';
                         }
-                    },
-                    fontSizeable: {
-                        get: () => config.font_size || defaultConfig.font_size,
-                        set: (value) => {
-                            config.font_size = value;
-                            window.elementSdk.setConfig({ font_size: value });
-                        }
-                    }
-                }),
-                mapToEditPanelValues: (config) => new Map([
-                    ["hero_greeting", config.hero_greeting || defaultConfig.hero_greeting],
-                    ["hero_tagline", config.hero_tagline || defaultConfig.hero_tagline],
-                    ["about_title", config.about_title || defaultConfig.about_title],
-                    ["education_title", config.education_title || defaultConfig.education_title],
-                    ["skills_title", config.skills_title || defaultConfig.skills_title],
-                    ["projects_title", config.projects_title || defaultConfig.projects_title],
-                    ["achievements_title", config.achievements_title || defaultConfig.achievements_title],
-                    ["contact_title", config.contact_title || defaultConfig.contact_title],
-                    ["footer_text", config.footer_text || defaultConfig.footer_text]
-                ])
-            });
-        }
-    </script>
-        <script>
-            // Mobile menu toggle logic
-            (function(){
-                const navToggle = document.getElementById('navToggle');
-                const mobileMenu = document.getElementById('mobileMenu');
-                const mobileBackdrop = document.getElementById('mobileBackdrop');
-                const mobileClose = document.getElementById('mobileClose');
-                const focusableSelector = 'a, button, input, textarea, [tabindex]:not([tabindex="-1"])';
 
-                function openMenu(){
-                    mobileMenu.classList.add('open');
-                    mobileBackdrop.classList.add('open');
-                    mobileMenu.setAttribute('aria-hidden','false');
-                    mobileBackdrop.setAttribute('aria-hidden','false');
-                    navToggle.setAttribute('aria-expanded','true');
-                    // focus first link
-                    const first = mobileMenu.querySelector(focusableSelector);
-                    if(first) first.focus();
-                    document.body.style.overflow = 'hidden';
-                }
+                        // attach to view buttons
+                        document.querySelectorAll('.cert-card').forEach(card=>{
+                                const view = card.querySelector('.cert-actions .btn-primary');
+                                if(!view) return;
+                                view.addEventListener('click', function(e){
+                                        e.preventDefault();
+                                        const thumb = card.querySelector('.cert-thumb img');
+                                        const src = thumb ? thumb.src : (view.getAttribute('href') || '');
+                                        const name = card.querySelector('.cert-body h3')?.textContent || '';
+                                        const issuerText = card.querySelector('.issuer')?.textContent || '';
+                                        const metaText = card.querySelector('.cert-meta')?.textContent || '';
+                                        openModal({src,name,issuerText,metaText});
+                                });
+                        });
 
-                function closeMenu(){
-                    mobileMenu.classList.remove('open');
-                    mobileBackdrop.classList.remove('open');
-                    mobileMenu.setAttribute('aria-hidden','true');
-                    mobileBackdrop.setAttribute('aria-hidden','true');
-                    navToggle.setAttribute('aria-expanded','false');
-                    navToggle.focus();
-                    document.body.style.overflow = '';
-                }
-
-                navToggle && navToggle.addEventListener('click', function(){
-                    const isOpen = mobileMenu.classList.contains('open');
-                    if(isOpen) closeMenu(); else openMenu();
-                });
-
-                mobileClose && mobileClose.addEventListener('click', closeMenu);
-                mobileBackdrop && mobileBackdrop.addEventListener('click', closeMenu);
-
-                // Close on ESC
-                document.addEventListener('keydown', function(e){
-                    if(e.key === 'Escape' && mobileMenu.classList.contains('open')){
-                        closeMenu();
-                    }
-                });
-
-                // close menu when a mobile link is clicked
-                mobileMenu.querySelectorAll('a[href^="#"]').forEach(a=>{
-                    a.addEventListener('click', function(){ closeMenu(); });
-                });
-
-                // Close mobile menu on resize to desktop
-                window.addEventListener('resize', function(){
-                    if(window.innerWidth > 780 && mobileMenu.classList.contains('open')){
-                        closeMenu();
-                    }
-                });
-            })();
-        </script>
+                        closeBtn.addEventListener('click', closeModal);
+                        backdrop.addEventListener('click', function(e){ if(e.target===backdrop) closeModal(); });
+                        document.addEventListener('keydown', function(e){ if(e.key==='Escape' && backdrop.style.display==='flex') closeModal(); });
+                })();
+                </script>
 </body>
 </html>
